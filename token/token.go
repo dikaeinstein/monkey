@@ -1,6 +1,6 @@
 package token
 
-// Type is the token type
+// Type is the set of lexical token types of the Monkey programming language.
 type Type string
 
 // Token represents a valid token of the monkey language
