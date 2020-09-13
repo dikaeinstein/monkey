@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/dikaeinstein/monkey/ast"
 	"github.com/dikaeinstein/monkey/lexer"
 	"github.com/dikaeinstein/monkey/token"
@@ -12,12 +14,22 @@ type Parser struct {
 	l         *lexer.Lexer
 	curToken  token.Token
 	peekToken token.Token
+	errors    []string
 }
 
 // New initialize and returns a new parser
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{l: l}
+
+	// Read two tokens, so curToken and peekToken are both set
+	p.nextToken()
+	p.nextToken()
+
 	return p
+}
+
+func (p *Parser) Errors() []string {
+	return p.errors
 }
 
 func (p *Parser) nextToken() {
@@ -27,24 +39,26 @@ func (p *Parser) nextToken() {
 
 // ParseProgram recursively parses the tokens and returns the root node
 func (p *Parser) ParseProgram() *ast.Program {
-	program := ast.Program{}
+	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
 
-	for p.curToken.Type != token.EOF {
+	for !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
+		p.nextToken()
 	}
 
-	p.nextToken()
-	return nil
+	return program
 }
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
+	case token.RETURN:
+		return p.parseReturnStatement()
 	default:
 		return nil
 	}
@@ -71,10 +85,40 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	return stmt
 }
 
-func (p *Parser) expectPeek(t token.Type) bool {
-	if p.curToken.Type != t {
-		return false
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	stmt := &ast.ReturnStatement{Token: p.curToken}
+
+	p.nextToken()
+
+	// TODO: We're skipping the expressions until we
+	// encounter a semicolon
+	for !p.curTokenIs(token.SEMICOLON) {
+		p.nextToken()
 	}
 
-	return true
+	return stmt
+}
+
+func (p *Parser) expectPeek(t token.Type) bool {
+	if p.peekTokenIs(t) {
+		p.nextToken()
+		return true
+	}
+
+	p.peekError(t)
+	return false
+}
+
+func (p *Parser) curTokenIs(t token.Type) bool {
+	return p.curToken.Type == t
+}
+
+func (p *Parser) peekTokenIs(t token.Type) bool {
+	return p.peekToken.Type == t
+}
+
+func (p *Parser) peekError(t token.Type) {
+	msg := fmt.Sprintf("expected next token to be %s; got %s instead",
+		t, p.peekToken.Type)
+	p.errors = append(p.errors, msg)
 }

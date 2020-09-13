@@ -4,7 +4,7 @@ import (
 	"github.com/dikaeinstein/monkey/token"
 )
 
-// Lexer transform the input(source code) to tokens
+// Lexer transforms the input(source code) to tokens
 type Lexer struct {
 	input        string
 	position     int  // current postion in input (points to current char)

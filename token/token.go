@@ -10,12 +10,13 @@ type Token struct {
 }
 
 const (
-	ILLEGAL Type = "ILLEGAL"
-	EOF          = "EOF"
+	ILLEGAL = "ILLEGAL"
+	EOF     = "EOF"
+
 	// Identifiers + literals
-	// IDENT is the identifier token
 	IDENT = "IDENT" // add, foobar, x, y, ...
 	INT   = "INT"
+
 	// Operators
 	ASSIGN   = "="
 	PLUS     = "+"
@@ -27,6 +28,7 @@ const (
 	GT       = ">"
 	EQ       = "=="
 	NOT_EQ   = "!="
+
 	// Delimiters
 	COMMA     = ","
 	SEMICOLON = ";"
@@ -34,8 +36,8 @@ const (
 	RPAREN    = ")"
 	LBRACE    = "{"
 	RBRACE    = "}"
+
 	// Keywords
-	// 1343456
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
 	IF       = "IF"

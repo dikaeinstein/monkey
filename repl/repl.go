@@ -11,7 +11,7 @@ import (
 
 const prompt = ">> "
 
-// Start starts the REPL with the given reader and writer
+// Start starts the REPL with the given io.Reader and io.Writer
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
