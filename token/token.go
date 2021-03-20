@@ -5,46 +5,46 @@ type Type string
 
 // Token represents a valid token of the monkey language
 type Token struct {
-	Type    Type
+	Type
 	Literal string
 }
 
 const (
-	ILLEGAL = "ILLEGAL"
-	EOF     = "EOF"
+	ILLEGAL Type = "ILLEGAL"
+	EOF     Type = "EOF"
 
 	// Identifiers + literals
-	IDENT = "IDENT" // add, foobar, x, y, ...
-	INT   = "INT"
+	IDENT Type = "IDENT" // add, foobar, x, y, ...
+	INT   Type = "INT"
 
 	// Operators
-	ASSIGN   = "="
-	PLUS     = "+"
-	MINUS    = "-"
-	BANG     = "!"
-	ASTERISK = "*"
-	SLASH    = "/"
-	LT       = "<"
-	GT       = ">"
-	EQ       = "=="
-	NOT_EQ   = "!="
+	ASSIGN   Type = "="
+	PLUS     Type = "+"
+	MINUS    Type = "-"
+	BANG     Type = "!"
+	ASTERISK Type = "*"
+	SLASH    Type = "/"
+	LT       Type = "<"
+	GT       Type = ">"
+	EQ       Type = "=="
+	NOT_EQ   Type = "!="
 
 	// Delimiters
-	COMMA     = ","
-	SEMICOLON = ";"
-	LPAREN    = "("
-	RPAREN    = ")"
-	LBRACE    = "{"
-	RBRACE    = "}"
+	COMMA     Type = ","
+	SEMICOLON Type = ";"
+	LPAREN    Type = "("
+	RPAREN    Type = ")"
+	LBRACE    Type = "{"
+	RBRACE    Type = "}"
 
 	// Keywords
-	FUNCTION = "FUNCTION"
-	LET      = "LET"
-	IF       = "IF"
-	ELSE     = "ELSE"
-	RETURN   = "RETURN"
-	FALSE    = "FALSE"
-	TRUE     = "TRUE"
+	FUNCTION Type = "FUNCTION"
+	LET      Type = "LET"
+	IF       Type = "IF"
+	ELSE     Type = "ELSE"
+	RETURN   Type = "RETURN"
+	FALSE    Type = "FALSE"
+	TRUE     Type = "TRUE"
 )
 
 var keywords = map[string]Type{
