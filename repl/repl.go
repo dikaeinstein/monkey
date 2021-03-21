@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/dikaeinstein/monkey/eval"
 	"github.com/dikaeinstein/monkey/lexer"
+	"github.com/dikaeinstein/monkey/object"
 	"github.com/dikaeinstein/monkey/parser"
 )
 
@@ -28,6 +30,7 @@ const MONKEY_FACE = `             __,__
 // Start starts the REPL with the given io.Reader and io.Writer
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
 
 	for {
 		fmt.Print(prompt)
@@ -45,10 +48,14 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		_, err := io.WriteString(out, program.String())
-		must(err)
-		_, err = io.WriteString(out, "\n")
-		must(err)
+		evaluated := eval.Eval(program, env)
+		if evaluated != nil {
+			_, err := io.WriteString(out, evaluated.Inspect())
+			must(err)
+			_, err = io.WriteString(out, "\n")
+			must(err)
+
+		}
 	}
 }
 
