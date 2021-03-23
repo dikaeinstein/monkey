@@ -14,8 +14,9 @@ const (
 	EOF     Type = "EOF"
 
 	// Identifiers + literals
-	IDENT Type = "IDENT" // add, foobar, x, y, ...
-	INT   Type = "INT"
+	IDENT  Type = "IDENT" // add, foobar, x, y, ...
+	INT    Type = "INT"
+	STRING Type = "STRING"
 
 	// Operators
 	ASSIGN   Type = "="
@@ -36,6 +37,9 @@ const (
 	RPAREN    Type = ")"
 	LBRACE    Type = "{"
 	RBRACE    Type = "}"
+	LBRACKET  Type = "["
+	RBRACKET  Type = "]"
+	COLON     Type = ":"
 
 	// Keywords
 	FUNCTION Type = "FUNCTION"

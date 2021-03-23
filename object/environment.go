@@ -29,7 +29,9 @@ func (env *Environment) TopFrame() *Frame {
 	return env.frames[len(env.frames)-1]
 }
 
-// Get returns the value associated to the variable from the environment .
+// Get returns the value associated to the variable from the environment.
+// Starting from the immediate stack frame all the way down to the main(global)
+// stack frame.
 func (env *Environment) Get(name string) (Object, bool) {
 	for i := len(env.frames) - 1; i >= 0; i-- {
 		if obj, ok := env.frames[i].Get(name); ok {

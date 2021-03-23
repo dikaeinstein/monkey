@@ -8,7 +8,7 @@ import (
 	"github.com/dikaeinstein/monkey/parser"
 )
 
-func TestEvaluateIntegerExpression(t *testing.T) {
+func TestEvalIntegerExpression(t *testing.T) {
 	testCases := []struct {
 		input    string
 		expected int64
@@ -33,6 +33,30 @@ func TestEvaluateIntegerExpression(t *testing.T) {
 	for _, tC := range testCases {
 		evaluated := testEval(t, tC.input)
 		testIntegerObject(t, evaluated, tC.expected)
+	}
+}
+
+func TestStringLiteral(t *testing.T) {
+	input := `"Hello World!"`
+	evaluated := testEval(t, input)
+	str, ok := evaluated.(object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+	}
+	if str != "Hello World!" {
+		t.Errorf("String has wrong value. got=%q", str)
+	}
+}
+
+func TestStringConcatenation(t *testing.T) {
+	input := `"Hello" + " " + "World!"`
+	evaluated := testEval(t, input)
+	str, ok := evaluated.(object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+	}
+	if str != "Hello World!" {
+		t.Errorf("String has wrong value. got=%q", str)
 	}
 }
 
@@ -172,6 +196,14 @@ func TestErrorHandling(t *testing.T) {
 			"foobar",
 			"identifier not found: foobar",
 		},
+		{
+			`"Hello" - "World"`,
+			"unknown operator: STRING - STRING",
+		},
+		{
+			`{"name": "Monkey"}[fn(x) { x }];`,
+			"unusable as hash key: FUNCTION",
+		},
 	}
 
 	for _, tC := range testCases {
@@ -251,6 +283,212 @@ func TestClosures(t *testing.T) {
 	addTwo(2);`
 
 	testIntegerObject(t, testEval(t, input), 4)
+}
+
+func TestBuiltinFunctions(t *testing.T) {
+	testCases := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`len("")`, 0},
+		{`len("four")`, 4},
+		{`len("hello world")`, 11},
+		{`len(1)`, "argument to `len` not supported, got INTEGER"},
+		{`len("one", "two")`, "wrong number of arguments. got=2, want=1"},
+		{`len([1,2,3])`, 3},
+		{`len([])`, 0},
+		{`first([1, "2", "a"])`, 1},
+		{`first([])`, null()},
+		{`rest([1, 2, 3, 4, 5])`, "[2, 3, 4, 5]"},
+		{`rest([1])`, "[]"},
+		{`rest([])`, null()},
+		{`let a = [1, 2, 3, 4]; rest(a)`, "[2, 3, 4]"},
+		{`push([1, 2, 3], 4)`, "[1, 2, 3, 4]"},
+		{`push([], 4)`, "[4]"},
+	}
+
+	for _, tC := range testCases {
+		evaluated := testEval(t, tC.input)
+		switch expected := tC.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case string:
+			switch obj := evaluated.(type) {
+			case object.Error:
+				if string(obj) != expected {
+					t.Errorf("wrong error message. expected=%q, got=%q",
+						expected, obj)
+				}
+			case *object.Array:
+				if obj.Inspect() != expected {
+					t.Errorf("expected %s, got %s", expected, obj.Inspect())
+				}
+			default:
+				t.Errorf("unknown ObjectType. got=%T (%+v))", evaluated, evaluated)
+			}
+		}
+	}
+}
+
+func TestArrayLiterals(t *testing.T) {
+	input := "[1, 2 * 2, 3 + 3]"
+
+	evaluated := testEval(t, input)
+	result, ok := evaluated.(*object.Array)
+	if !ok {
+		t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if len(result.Elements) != 3 {
+		t.Fatalf("array has wrong num of elements. got=%d",
+			len(result.Elements))
+	}
+
+	testIntegerObject(t, result.Elements[0], 1)
+	testIntegerObject(t, result.Elements[1], 4)
+	testIntegerObject(t, result.Elements[2], 6)
+}
+
+func TestArrayIndexExpressions(t *testing.T) {
+	testCases := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			"[1, 2, 3][0]",
+			1,
+		},
+		{
+			"[1, 2, 3][1]",
+			2,
+		},
+		{
+			"[1, 2, 3][2]",
+			3,
+		},
+		{
+			"let i = 0; [1][i];",
+			1,
+		},
+		{
+			"[1, 2, 3][1 + 1];",
+			3,
+		},
+		{
+			"let myArray = [1, 2, 3]; myArray[2];",
+			3,
+		},
+		{
+			"let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];",
+			6,
+		},
+		{
+			"let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]",
+			2,
+		},
+		{
+			"[1, 2, 3][3]",
+			nil,
+		},
+		{
+			"[1, 2, 3][-1]",
+			nil,
+		},
+	}
+
+	for _, tC := range testCases {
+		evaluated := testEval(t, tC.input)
+		integer, ok := tC.expected.(int)
+		if ok {
+			testIntegerObject(t, evaluated, int64(integer))
+		} else {
+			testNullObject(t, evaluated)
+		}
+	}
+}
+
+func TestHashLiterals(t *testing.T) {
+	input := `let two = "two";
+	{
+		"one": 10 - 9,
+		two: 1 + 1,
+		"thr" + "ee": 6 / 2,
+		4: 4,
+		true: 5,
+		false: 6
+	}`
+
+	evaluated := testEval(t, input)
+	result, ok := evaluated.(*object.Hash)
+	if !ok {
+		t.Fatalf("Eval didn't return Hash. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	expected := map[string]int64{
+		"one":   1,
+		"two":   2,
+		"three": 3,
+		"4":     4,
+		"true":  5,
+		"false": 6,
+	}
+	if len(result.Pairs) != len(expected) {
+		t.Fatalf("Hash has wrong num of pairs. got=%d", len(result.Pairs))
+	}
+	for expectedKey, expectedValue := range expected {
+		value, ok := result.Pairs[object.String(expectedKey)]
+		if !ok {
+			t.Errorf("no pair for given key in Pairs")
+		}
+		testIntegerObject(t, value, expectedValue)
+	}
+}
+
+func TestHashIndexExpressions(t *testing.T) {
+	testCases := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`{"foo": 5}["foo"]`,
+			5,
+		},
+		{
+			`{"foo": 5}["bar"]`,
+			nil,
+		},
+		{
+			`let key = "foo"; {"foo": 5}[key]`,
+			5,
+		},
+		{
+			`{}["foo"]`,
+			nil,
+		},
+		{
+			`{5: 5}[5]`,
+			5,
+		},
+		{
+			`{true: 5}[true]`,
+			5,
+		},
+		{
+			`{false: 5}[false]`,
+			5,
+		},
+	}
+
+	for _, tC := range testCases {
+		evaluated := testEval(t, tC.input)
+		integer, ok := tC.expected.(int)
+
+		if ok {
+			testIntegerObject(t, evaluated, int64(integer))
+		} else {
+			testNullObject(t, evaluated)
+		}
+	}
 }
 
 func testNullObject(t *testing.T, obj object.Object) bool {

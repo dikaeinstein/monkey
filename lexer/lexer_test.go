@@ -26,6 +26,13 @@ if (5 < 10) {
 
 10 == 10;
 10 != 9;
+
+"foobar"
+"foo bar"
+
+[1, 2];
+
+{"name": "Jimmy", "age": 72, "band": "Led Zeppelin"};
 `
 
 	tests := []struct {
@@ -104,6 +111,28 @@ if (5 < 10) {
 		{token.INT, "10"},
 		{token.NOT_EQ, "!="},
 		{token.INT, "9"},
+		{token.SEMICOLON, ";"},
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
+		{token.LBRACKET, "["},
+		{token.INT, "1"},
+		{token.COMMA, ","},
+		{token.INT, "2"},
+		{token.RBRACKET, "]"},
+		{token.SEMICOLON, ";"},
+		{token.LBRACE, "{"},
+		{token.STRING, "name"},
+		{token.COLON, ":"},
+		{token.STRING, "Jimmy"},
+		{token.COMMA, ","},
+		{token.STRING, "age"},
+		{token.COLON, ":"},
+		{token.INT, "72"},
+		{token.COMMA, ","},
+		{token.STRING, "band"},
+		{token.COLON, ":"},
+		{token.STRING, "Led Zeppelin"},
+		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}

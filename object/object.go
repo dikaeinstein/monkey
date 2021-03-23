@@ -18,17 +18,26 @@ type Object interface {
 }
 
 const (
+	ARRAY    ObjectType = "ARRAY"
 	BOOLEAN  ObjectType = "BOOLEAN"
+	BUILTIN  ObjectType = "BUILTIN"
 	ERROR    ObjectType = "ERROR"
 	FUNCTION ObjectType = "FUNCTION"
+	HASH     ObjectType = "HASH"
 	INTEGER  ObjectType = "INTEGER"
 	NULL     ObjectType = "NULL"
+	STRING   ObjectType = "STRING"
 )
 
 type Integer int64
 
 func (i Integer) Type() ObjectType { return INTEGER }
 func (i Integer) Inspect() string  { return fmt.Sprint(i) }
+
+type String string
+
+func (s String) Type() ObjectType { return STRING }
+func (s String) Inspect() string  { return string(s) }
 
 type Boolean bool
 
@@ -66,6 +75,51 @@ func (fn *Function) Inspect() string {
 	out.WriteString(") {\n")
 	out.WriteString(fn.Body.String())
 	out.WriteString("\n}")
+
+	return out.String()
+}
+
+type BuiltInFunction func(args ...Object) Object
+
+func (bf BuiltInFunction) Type() ObjectType { return BUILTIN }
+func (bf BuiltInFunction) Inspect() string  { return "builtin function" }
+
+type Array struct {
+	Elements []Object
+}
+
+func (a *Array) Type() ObjectType { return ARRAY }
+func (a *Array) Inspect() string {
+	var out bytes.Buffer
+
+	elements := []string{}
+	for _, e := range a.Elements {
+		elements = append(elements, e.Inspect())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
+type Hash struct {
+	Pairs map[String]Object
+}
+
+func (h *Hash) Type() ObjectType { return HASH }
+func (h *Hash) Inspect() string {
+	var out bytes.Buffer
+
+	pairs := []string{}
+	for k, v := range h.Pairs {
+		pairs = append(pairs, fmt.Sprintf("%s: %s", k.Inspect(), v.Inspect()))
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
 
 	return out.String()
 }
