@@ -24,7 +24,7 @@ const (
 // operator precedence
 var precedences = map[token.Type]int{
 	token.EQ:       EQUALS,
-	token.NOT_EQ:   EQUALS,
+	token.NotEQ:    EQUALS,
 	token.GT:       LESSGREATER,
 	token.LT:       LESSGREATER,
 	token.MINUS:    SUM,
@@ -40,7 +40,7 @@ type (
 	infixParseFn  func(ast.Expression) ast.Expression
 )
 
-// Parser is a recursive decent parser that analyses the sequence of
+// Parser is a recursive decent parser that analyzes the sequence of
 // tokens to generate the AST
 type Parser struct {
 	l      *lexer.Lexer
@@ -80,7 +80,7 @@ func New(l *lexer.Lexer) *Parser {
 
 	// register parseFn for infix operators
 	p.registerInfix(token.EQ, p.parseInfixExpression)
-	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
+	p.registerInfix(token.NotEQ, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)

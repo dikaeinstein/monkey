@@ -7,7 +7,7 @@ import (
 // Lexer transforms the input(source code) to tokens
 type Lexer struct {
 	input        string
-	position     int  // current postion in input (points to current char)
+	position     int  // current position in input (points to current char)
 	readPosition int  // current reading position in input (after current char)
 	ch           byte // current char under examination
 }
@@ -20,6 +20,7 @@ func New(input string) *Lexer {
 }
 
 // NextToken returns the next transformed token
+//gocyclo:ignore
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
@@ -44,7 +45,7 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.NOT_EQ, Literal: string(ch) + string(l.ch)}
+			tok = token.Token{Type: token.NotEQ, Literal: string(ch) + string(l.ch)}
 		} else {
 			tok = newToken(token.BANG, l.ch)
 		}

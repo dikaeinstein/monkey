@@ -11,6 +11,8 @@ import (
 // The one and only null value
 var defaultNull = &object.Null{}
 
+// Eval evaluates walks the code by walking the parsed AST
+//gocyclo:ignore
 func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	// Statements
@@ -140,7 +142,7 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 		return object.Integer(lVal / rVal)
 	case string(token.EQ):
 		return object.Boolean(lVal == rVal)
-	case string(token.NOT_EQ):
+	case string(token.NotEQ):
 		return object.Boolean(lVal != rVal)
 	case string(token.GT):
 		return object.Boolean(lVal > rVal)
@@ -159,7 +161,7 @@ func evalBooleanInfixExpression(operator string, left, right object.Object) obje
 	switch operator {
 	case string(token.EQ):
 		return object.Boolean(lVal == rVal)
-	case string(token.NOT_EQ):
+	case string(token.NotEQ):
 		return object.Boolean(lVal != rVal)
 	default:
 		return newError("unknown operator: %s %s %s",
@@ -176,7 +178,7 @@ func evalStringInfixExpression(operator string, left, right object.Object) objec
 			left.Type(), operator, right.Type())
 	}
 
-	return object.String(lVal + rVal)
+	return lVal + rVal
 }
 
 func evalBangOperatorExpression(right object.Object) object.Object {
@@ -289,7 +291,7 @@ func evalArrayLiteral(node *ast.ArrayLiteral, env *object.Environment) object.Ob
 	return &object.Array{Elements: elements}
 }
 
-func evalIndexExpression(left object.Object, index object.Object) object.Object {
+func evalIndexExpression(left, index object.Object) object.Object {
 	switch {
 	case left.Type() == object.ARRAY && index.Type() == object.INTEGER:
 		return evalArrayIndexExpression(left, index)
@@ -300,7 +302,7 @@ func evalIndexExpression(left object.Object, index object.Object) object.Object 
 	}
 }
 
-func evalArrayIndexExpression(left object.Object, index object.Object) object.Object {
+func evalArrayIndexExpression(left, index object.Object) object.Object {
 	array := left.(*object.Array)
 	idx := index.(object.Integer)
 	max := int64(len(array.Elements) - 1)
@@ -346,7 +348,7 @@ func evalHashKey(key object.Object) object.Object {
 	}
 }
 
-func evalHashIndexExpression(left object.Object, index object.Object) object.Object {
+func evalHashIndexExpression(left, index object.Object) object.Object {
 	hash := left.(*object.Hash)
 	kk := evalHashKey(index)
 	if isError(kk) {

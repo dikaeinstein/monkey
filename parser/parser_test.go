@@ -39,7 +39,6 @@ func TestLetStatements(t *testing.T) {
 }
 
 func TestReturnStatemet(t *testing.T) {
-
 	testCases := []struct {
 		input    string
 		expected interface{}
@@ -821,20 +820,16 @@ func testInfixExpression(t *testing.T, exp ast.Expression, left interface{}, ope
 	return true
 }
 
-func testPrefixExpression(t *testing.T, exp ast.Expression, operator string, right interface{}) bool {
+func testPrefixExpression(t *testing.T, exp ast.Expression, operator string, right interface{}) {
 	t.Helper()
 
 	opExp, ok := exp.(*ast.PrefixExpression)
 	if !ok {
 		t.Errorf("exp is not ast.PrefixExpression. got=%T(%s)", exp, exp)
-		return false
 	}
 	if opExp.Operator != operator {
 		t.Errorf("exp.Operator is not '%s'. got=%q", operator, opExp.Operator)
-		return false
 	}
-	if !testLiteralExpression(t, opExp.Right, right) {
-		return false
-	}
-	return true
+
+	testLiteralExpression(t, opExp.Right, right)
 }

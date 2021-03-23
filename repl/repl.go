@@ -14,7 +14,8 @@ import (
 const prompt = ">> "
 const allowedNumOfErrors = 0
 
-const MONKEY_FACE = `             __,__
+// MonkeyFace is the face of our lovely mascot
+const MonkeyFace = `             __,__
      .--. .-"     "-. .--.
     / .. \/ .-. .-. \/ .. \
    | |  '| /   Y   \ |'  | |
@@ -54,7 +55,6 @@ func Start(in io.Reader, out io.Writer) {
 			must(err)
 			_, err = io.WriteString(out, "\n")
 			must(err)
-
 		}
 	}
 }

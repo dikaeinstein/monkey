@@ -8,51 +8,51 @@ import (
 	"github.com/dikaeinstein/monkey/ast"
 )
 
-type ObjectType string
+type Type string
 
 // Object represents values in the host language(GO).
 // An object can either be a primitive or reference value.
 type Object interface {
-	Type() ObjectType
+	Type() Type
 	Inspect() string
 }
 
 const (
-	ARRAY    ObjectType = "ARRAY"
-	BOOLEAN  ObjectType = "BOOLEAN"
-	BUILTIN  ObjectType = "BUILTIN"
-	ERROR    ObjectType = "ERROR"
-	FUNCTION ObjectType = "FUNCTION"
-	HASH     ObjectType = "HASH"
-	INTEGER  ObjectType = "INTEGER"
-	NULL     ObjectType = "NULL"
-	STRING   ObjectType = "STRING"
+	ARRAY    Type = "ARRAY"
+	BOOLEAN  Type = "BOOLEAN"
+	BUILTIN  Type = "BUILTIN"
+	ERROR    Type = "ERROR"
+	FUNCTION Type = "FUNCTION"
+	HASH     Type = "HASH"
+	INTEGER  Type = "INTEGER"
+	NULL     Type = "NULL"
+	STRING   Type = "STRING"
 )
 
 type Integer int64
 
-func (i Integer) Type() ObjectType { return INTEGER }
-func (i Integer) Inspect() string  { return fmt.Sprint(i) }
+func (i Integer) Type() Type      { return INTEGER }
+func (i Integer) Inspect() string { return fmt.Sprint(i) }
 
 type String string
 
-func (s String) Type() ObjectType { return STRING }
-func (s String) Inspect() string  { return string(s) }
+func (s String) Type() Type      { return STRING }
+func (s String) Inspect() string { return string(s) }
 
 type Boolean bool
 
-func (b Boolean) Type() ObjectType { return BOOLEAN }
-func (b Boolean) Inspect() string  { return fmt.Sprint(b) }
+func (b Boolean) Type() Type      { return BOOLEAN }
+func (b Boolean) Inspect() string { return fmt.Sprint(b) }
 
 type Null struct{}
 
-func (n Null) Type() ObjectType { return NULL }
-func (n Null) Inspect() string  { return "null" }
+func (n Null) Type() Type      { return NULL }
+func (n Null) Inspect() string { return "null" }
 
 type Error string
 
-func (e Error) Type() ObjectType { return ERROR }
-func (e Error) Inspect() string  { return fmt.Sprintf("Error: %s", e) }
+func (e Error) Type() Type      { return ERROR }
+func (e Error) Inspect() string { return fmt.Sprintf("Error: %s", e) }
 
 type Function struct {
 	Parameters []*ast.Identifier
@@ -60,7 +60,7 @@ type Function struct {
 	Env        *Environment
 }
 
-func (fn *Function) Type() ObjectType { return FUNCTION }
+func (fn *Function) Type() Type { return FUNCTION }
 func (fn *Function) Inspect() string {
 	var out bytes.Buffer
 
@@ -81,14 +81,14 @@ func (fn *Function) Inspect() string {
 
 type BuiltInFunction func(args ...Object) Object
 
-func (bf BuiltInFunction) Type() ObjectType { return BUILTIN }
-func (bf BuiltInFunction) Inspect() string  { return "builtin function" }
+func (bf BuiltInFunction) Type() Type      { return BUILTIN }
+func (bf BuiltInFunction) Inspect() string { return "builtin function" }
 
 type Array struct {
 	Elements []Object
 }
 
-func (a *Array) Type() ObjectType { return ARRAY }
+func (a *Array) Type() Type { return ARRAY }
 func (a *Array) Inspect() string {
 	var out bytes.Buffer
 
@@ -108,7 +108,7 @@ type Hash struct {
 	Pairs map[String]Object
 }
 
-func (h *Hash) Type() ObjectType { return HASH }
+func (h *Hash) Type() Type { return HASH }
 func (h *Hash) Inspect() string {
 	var out bytes.Buffer
 

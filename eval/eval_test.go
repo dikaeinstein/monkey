@@ -324,7 +324,7 @@ func TestBuiltinFunctions(t *testing.T) {
 					t.Errorf("expected %s, got %s", expected, obj.Inspect())
 				}
 			default:
-				t.Errorf("unknown ObjectType. got=%T (%+v))", evaluated, evaluated)
+				t.Errorf("unknown Type. got=%T (%+v))", evaluated, evaluated)
 			}
 		}
 	}
@@ -491,12 +491,10 @@ func TestHashIndexExpressions(t *testing.T) {
 	}
 }
 
-func testNullObject(t *testing.T, obj object.Object) bool {
+func testNullObject(t *testing.T, obj object.Object) {
 	if obj != null() {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
-		return false
 	}
-	return true
 }
 
 func testEval(t *testing.T, input string) object.Object {
@@ -526,36 +524,28 @@ func checkParserErrors(t *testing.T, p *parser.Parser) {
 	t.FailNow()
 }
 
-func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
+func testIntegerObject(t *testing.T, obj object.Object, expected int64) {
 	t.Helper()
 
 	intObj, ok := obj.(object.Integer)
 	if !ok {
 		t.Errorf("object is not an Integer. got=%T (%+v)", obj, obj)
-		return false
 	}
 	result := int64(intObj)
 	if result != expected {
 		t.Errorf("object has wrong value. got=%d, want=%d", result, expected)
-		return false
 	}
-
-	return true
 }
 
-func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
+func testBooleanObject(t *testing.T, obj object.Object, expected bool) {
 	t.Helper()
 
 	boolObj, ok := obj.(object.Boolean)
 	if !ok {
 		t.Errorf("object is not a Boolean. got=%T (%+v)", obj, obj)
-		return false
 	}
 	result := bool(boolObj)
 	if result != expected {
 		t.Errorf("object has wrong value. got=%t, want=%t", result, expected)
-		return false
 	}
-
-	return true
 }

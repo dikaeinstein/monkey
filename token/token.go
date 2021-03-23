@@ -28,7 +28,7 @@ const (
 	LT       Type = "<"
 	GT       Type = ">"
 	EQ       Type = "=="
-	NOT_EQ   Type = "!="
+	NotEQ    Type = "!="
 
 	// Delimiters
 	COMMA     Type = ","

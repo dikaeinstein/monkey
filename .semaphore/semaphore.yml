@@ -1,0 +1,16 @@
+# .semaphore/semaphore.yml
+blocks:
+  - name: "Linting"
+    task:
+      jobs:
+        - name: Lint
+          commands:
+            - checkout
+            - make lint
+  - name: "Tests"
+    task:
+      jobs:
+        - name: Unit
+          commands:
+            - checkout
+            - make test

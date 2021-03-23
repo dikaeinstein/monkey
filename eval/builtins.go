@@ -8,7 +8,8 @@ import (
 
 var builtins = map[string]object.BuiltInFunction{
 	"len": func(args ...object.Object) object.Object {
-		err := checkArgsLen(1, args)
+		const allowedNumOfArgs = 1
+		err := checkArgsLen(allowedNumOfArgs, args)
 		if isError(err) {
 			return err
 		}
@@ -23,7 +24,8 @@ var builtins = map[string]object.BuiltInFunction{
 		}
 	},
 	"first": func(args ...object.Object) object.Object {
-		err := checkArgsLen(1, args)
+		const allowedNumOfArgs = 1
+		err := checkArgsLen(allowedNumOfArgs, args)
 		if isError(err) {
 			return err
 		}
@@ -40,7 +42,8 @@ var builtins = map[string]object.BuiltInFunction{
 		return arr.Elements[0]
 	},
 	"rest": func(args ...object.Object) object.Object {
-		err := checkArgsLen(1, args)
+		const allowedNumOfArgs = 1
+		err := checkArgsLen(allowedNumOfArgs, args)
 		if isError(err) {
 			return err
 		}
@@ -60,7 +63,8 @@ var builtins = map[string]object.BuiltInFunction{
 		return &object.Array{Elements: newElements}
 	},
 	"push": func(args ...object.Object) object.Object {
-		err := checkArgsLen(2, args)
+		const allowedNumOfArgs = 2
+		err := checkArgsLen(allowedNumOfArgs, args)
 		if isError(err) {
 			return err
 		}
