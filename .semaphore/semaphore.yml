@@ -1,16 +1,38 @@
 # .semaphore/semaphore.yml
+version: v1.0
+name: Monkey Programming Language
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+
 blocks:
-  - name: "Linting"
+  - name: Check code style
     task:
       jobs:
         - name: Lint
           commands:
             - checkout
+            - sem-version go 1.15
+            - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.38.0
+            - golangci-lint --version
             - make lint
-  - name: "Tests"
+  - name: Test
     task:
       jobs:
-        - name: Unit
+        - name: Go test
           commands:
             - checkout
+            - sem-version go 1.15
             - make test
+  - name: Build project
+    task:
+      jobs:
+      - name: Build Binary
+        commands:
+          - checkout
+          - sem-version go 1.15
+          - make build
+          - mkdir bin
+          - mv monkey bin
+          - cache store $(checksum cmd/main.go) bin
