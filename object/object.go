@@ -27,6 +27,8 @@ const (
 	INTEGER  Type = "INTEGER"
 	NULL     Type = "NULL"
 	STRING   Type = "STRING"
+	QUOTE    Type = "QUOTE"
+	MACRO    Type = "MACRO"
 )
 
 type Integer int64
@@ -120,6 +122,40 @@ func (h *Hash) Inspect() string {
 	out.WriteString("{")
 	out.WriteString(strings.Join(pairs, ", "))
 	out.WriteString("}")
+
+	return out.String()
+}
+
+type Exp struct{ ast.Expression }
+
+type Quote struct{ ast.Node }
+
+func (q *Quote) Type() Type { return QUOTE }
+func (q *Quote) Inspect() string {
+	return "QUOTE(" + q.Node.String() + ")"
+}
+
+type Macro struct {
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
+func (m *Macro) Type() Type { return FUNCTION }
+func (m *Macro) Inspect() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, p := range m.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString("macro")
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") {\n")
+	out.WriteString(m.Body.String())
+	out.WriteString("\n}")
 
 	return out.String()
 }

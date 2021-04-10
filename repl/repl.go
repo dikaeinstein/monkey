@@ -31,7 +31,9 @@ const MonkeyFace = `             __,__
 // Start starts the REPL with the given io.Reader and io.Writer
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+
 	env := object.NewEnvironment()
+	macroEnv := object.NewEnvironment()
 
 	for {
 		fmt.Print(prompt)
@@ -49,7 +51,10 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		evaluated := eval.Eval(program, env)
+		eval.DefineMacros(program, macroEnv)
+		expanded := eval.ExpandMacros(program, macroEnv)
+
+		evaluated := eval.Eval(expanded, env)
 		if evaluated != nil {
 			_, err := io.WriteString(out, evaluated.Inspect())
 			must(err)

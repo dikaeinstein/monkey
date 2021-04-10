@@ -87,7 +87,7 @@ var builtins = map[string]object.BuiltInFunction{
 			fmt.Println(arg.Inspect())
 		}
 
-		return null()
+		return nil
 	},
 }
 

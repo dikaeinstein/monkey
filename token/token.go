@@ -49,6 +49,7 @@ const (
 	RETURN   Type = "RETURN"
 	FALSE    Type = "FALSE"
 	TRUE     Type = "TRUE"
+	MACRO    Type = "MACRO"
 )
 
 var keywords = map[string]Type{
@@ -59,6 +60,7 @@ var keywords = map[string]Type{
 	"return": RETURN,
 	"true":   TRUE,
 	"false":  FALSE,
+	"macro":  MACRO,
 }
 
 // LookupIdent returns the appropriate keyword token type or IDENT

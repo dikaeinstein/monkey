@@ -250,6 +250,10 @@ func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Ob
 }
 
 func evalCallExpression(node *ast.CallExpression, env *object.Environment) object.Object {
+	if node.Function.TokenLiteral() == "quote" {
+		return quote(node.Arguments[0], env)
+	}
+
 	fn := Eval(node.Function, env)
 	if isError(fn) {
 		return fn
@@ -362,6 +366,62 @@ func evalHashIndexExpression(left, index object.Object) object.Object {
 	}
 
 	return val
+}
+
+func quote(node ast.Node, env *object.Environment) object.Object {
+	node = evalUnquoteCalls(node, env)
+	return &object.Quote{Node: node}
+}
+
+func evalUnquoteCalls(node ast.Node, env *object.Environment) ast.Node {
+	return ast.Modify(node, func(node ast.Node) ast.Node {
+		if !isUnquotedCall(node) {
+			return node
+		}
+
+		call, ok := node.(*ast.CallExpression)
+		if !ok {
+			return node
+		}
+
+		if len(call.Arguments) != 1 {
+			return node
+		}
+
+		return convertObjectToASTNode(Eval(call.Arguments[0], env))
+	})
+}
+
+func isUnquotedCall(node ast.Node) bool {
+	exp, ok := node.(*ast.CallExpression)
+	if !ok {
+		return false
+	}
+
+	return exp.Function.TokenLiteral() == "unquote"
+}
+
+func convertObjectToASTNode(obj object.Object) ast.Node {
+	switch obj := obj.(type) {
+	case object.Integer:
+		t := token.Token{
+			Type:    token.INT,
+			Literal: fmt.Sprintf("%d", obj),
+		}
+		return &ast.IntegerLiteral{Token: t, Value: int64(obj)}
+	case object.Boolean:
+		var t token.Token
+		if obj {
+			t = token.Token{Type: token.TRUE, Literal: "true"}
+		} else {
+			t = token.Token{Type: token.FALSE, Literal: "false"}
+		}
+		return &ast.Boolean{Token: t, Value: bool(obj)}
+	case *object.Quote:
+		return obj.Node
+	default:
+		return nil
+	}
 }
 
 func isTruthy(obj object.Object) bool {
