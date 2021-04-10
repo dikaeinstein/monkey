@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	_ int = iota
+	_ uint = iota
 	LOWEST
 	EQUALS      // ==
 	LESSGREATER // > or <
@@ -22,7 +22,7 @@ const (
 )
 
 // operator precedence
-var precedences = map[token.Type]int{
+var precedences = map[token.Type]uint{
 	token.EQ:       EQUALS,
 	token.NotEQ:    EQUALS,
 	token.GT:       LESSGREATER,
@@ -191,7 +191,7 @@ func (p *Parser) noPrefixParseFnError(t token.Type) {
 	p.errors = append(p.errors, msg)
 }
 
-func (p *Parser) parseExpression(precedence int) ast.Expression {
+func (p *Parser) parseExpression(precedence uint) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 
 	if prefix == nil {
@@ -504,7 +504,7 @@ func (p *Parser) peekError(t token.Type) {
 	p.errors = append(p.errors, msg)
 }
 
-func (p *Parser) curPrecedence() int {
+func (p *Parser) curPrecedence() uint {
 	if p, ok := precedences[p.curToken.Type]; ok {
 		return p
 	}
@@ -512,7 +512,7 @@ func (p *Parser) curPrecedence() int {
 	return LOWEST
 }
 
-func (p *Parser) peekPrecedence() int {
+func (p *Parser) peekPrecedence() uint {
 	if p, ok := precedences[p.peekToken.Type]; ok {
 		return p
 	}
