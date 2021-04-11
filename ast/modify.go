@@ -2,6 +2,8 @@ package ast
 
 type ModifierFunc func(Node) Node
 
+//gocyclo:ignore
+// Modify modifies the AST in place
 func Modify(node Node, modifier ModifierFunc) Node {
 	switch node := node.(type) {
 	case *Program:

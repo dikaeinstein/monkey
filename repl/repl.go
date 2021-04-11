@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/dikaeinstein/monkey/compile"
 	"github.com/dikaeinstein/monkey/eval"
 	"github.com/dikaeinstein/monkey/lexer"
 	"github.com/dikaeinstein/monkey/object"
 	"github.com/dikaeinstein/monkey/parser"
+	"github.com/dikaeinstein/monkey/vm"
 )
 
 const prompt = ">> "
@@ -32,7 +34,7 @@ const MonkeyFace = `             __,__
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
-	env := object.NewEnvironment()
+	// env := object.NewEnvironment()
 	macroEnv := object.NewEnvironment()
 
 	for {
@@ -54,13 +56,35 @@ func Start(in io.Reader, out io.Writer) {
 		eval.DefineMacros(program, macroEnv)
 		expanded := eval.ExpandMacros(program, macroEnv)
 
-		evaluated := eval.Eval(expanded, env)
-		if evaluated != nil {
-			_, err := io.WriteString(out, evaluated.Inspect())
-			must(err)
-			_, err = io.WriteString(out, "\n")
-			must(err)
+		// TODO
+		// evaluated := eval.Eval(expanded, env)
+		// if evaluated != nil {
+		// 	_, err := io.WriteString(out, evaluated.Inspect())
+		// 	must(err)
+		// 	_, err = io.WriteString(out, "\n")
+		// 	must(err)
+		// }
+
+		compiler := compile.New()
+		err := compiler.Compile(expanded)
+		if err != nil {
+			fmt.Fprintf(out, "Woops! Compilation failed:\n %s\n", err)
+			continue
 		}
+
+		machine := vm.New(compiler.Bytecode())
+		err = machine.Run()
+		if err != nil {
+			fmt.Fprintf(out, "Woops! Executing bytecode failed:\n %s\n", err)
+			continue
+		}
+
+		machine.StackTop()
+		stackTop := machine.StackTop()
+		_, err = io.WriteString(out, stackTop.Inspect())
+		must(err)
+		_, err = io.WriteString(out, "\n")
+		must(err)
 	}
 }
 
