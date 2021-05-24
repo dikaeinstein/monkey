@@ -268,20 +268,19 @@ func evalCallExpression(node *ast.CallExpression, env *object.Environment) objec
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-	switch function := fn.(type) {
+	switch fn := fn.(type) {
 	case *object.Function:
-		// allocate a new frame for function on top of the stack
-		function.Env.AddFrame()
+		env := object.NewEnclosedEnvironment(fn.Env)
 		// bind arguments to parameters in the function stack frame a.k.a scope
 		for i, arg := range args {
-			ident := function.Parameters[i]
-			function.Env.Set(ident.Value, arg)
+			ident := fn.Parameters[i]
+			env.Set(ident.Value, arg)
 		}
 
-		return evalStatements(function.Body.Statements, function.Env)
+		return evalStatements(fn.Body.Statements, env)
 	case object.BuiltInFunction:
 		// use function already defined with host lang(Go)
-		return function(args...)
+		return fn(args...)
 	default:
 		return newError("not a function: %s", fn.Type())
 	}

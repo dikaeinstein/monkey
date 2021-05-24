@@ -276,13 +276,22 @@ func TestFunctionApplication(t *testing.T) {
 
 func TestClosures(t *testing.T) {
 	input := `
-	let newAdder = fn(x) {
-		fn(y) { x + y };
+	let fibonacci = fn(x) {
+		if (x == 0) {
+			0
+		} else {
+			if (x == 1) {
+				return 1;
+			} else {
+				return fibonacci(x - 1) + fibonacci(x - 2);
+			}
+		}
 	};
-	let addTwo = newAdder(2);
-	addTwo(2);`
 
-	testIntegerObject(t, testEval(t, input), 4)
+	fibonacci(15);
+	`
+
+	testIntegerObject(t, testEval(t, input), 610)
 }
 
 func TestBuiltinFunctions(t *testing.T) {
@@ -298,10 +307,10 @@ func TestBuiltinFunctions(t *testing.T) {
 		{`len([1,2,3])`, 3},
 		{`len([])`, 0},
 		{`first([1, "2", "a"])`, 1},
-		{`first([])`, null()},
+		{`first([])`, object.NullValue()},
 		{`rest([1, 2, 3, 4, 5])`, "[2, 3, 4, 5]"},
 		{`rest([1])`, "[]"},
-		{`rest([])`, null()},
+		{`rest([])`, object.NullValue()},
 		{`let a = [1, 2, 3, 4]; rest(a)`, "[2, 3, 4]"},
 		{`push([1, 2, 3], 4)`, "[1, 2, 3, 4]"},
 		{`push([], 4)`, "[4]"},
@@ -599,7 +608,7 @@ func TestQuoteUnquote(t *testing.T) {
 }
 
 func testNullObject(t *testing.T, obj object.Object) {
-	if obj != null() {
+	if obj != object.NullValue() {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
 	}
 }
