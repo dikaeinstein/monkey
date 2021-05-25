@@ -12,6 +12,21 @@ func TestMake(t *testing.T) {
 	}{
 		{OpConstant, []int{65534}, []byte{byte(OpConstant), 255, 254}},
 		{OpAdd, []int{}, []byte{byte(OpAdd)}},
+		{OpPop, []int{}, []byte{byte(OpPop)}},
+		{OpSub, []int{}, []byte{byte(OpSub)}},
+		{OpMul, []int{}, []byte{byte(OpMul)}},
+		{OpDiv, []int{}, []byte{byte(OpDiv)}},
+		{OpTrue, []int{}, []byte{byte(OpTrue)}},
+		{OpFalse, []int{}, []byte{byte(OpFalse)}},
+		{OpEqual, []int{}, []byte{byte(OpEqual)}},
+		{OpNotEqual, []int{}, []byte{byte(OpNotEqual)}},
+		{OpGreaterThan, []int{}, []byte{byte(OpGreaterThan)}},
+		{OpBang, []int{}, []byte{byte(OpBang)}},
+		{OpMinus, []int{}, []byte{byte(OpMinus)}},
+		{OpGetLocal, []int{255}, []byte{byte(OpGetLocal), 255}},
+		{OpSetLocal, []int{255}, []byte{byte(OpSetLocal), 255}},
+		{OpSetLocal, []int{255}, []byte{byte(OpSetLocal), 255}},
+		{OpClosure, []int{65534, 255}, []byte{byte(OpClosure), 255, 254, 255}},
 	}
 
 	for _, tC := range testCases {
@@ -34,15 +49,23 @@ func TestMake(t *testing.T) {
 func TestInstructionsString(t *testing.T) {
 	instructions := []Instructions{
 		Make(OpAdd),
+		Make(OpPop),
 		Make(OpConstant, 1),
 		Make(OpConstant, 2),
 		Make(OpConstant, 65535),
+		Make(OpGetLocal, 255),
+		Make(OpSetLocal, 255),
+		Make(OpClosure, 65535, 255),
 	}
 
 	expected := `0000 OpAdd
-0001 OpConstant 1
-0004 OpConstant 2
-0007 OpConstant 65535
+0001 OpPop
+0002 OpConstant 1
+0005 OpConstant 2
+0008 OpConstant 65535
+0011 OpGetLocal 255
+0013 OpSetLocal 255
+0015 OpClosure 65535 255
 `
 
 	concatted := Instructions{}
@@ -63,6 +86,7 @@ func TestReadOperands(t *testing.T) {
 		bytesRead uint
 	}{
 		{OpConstant, []int{65535}, 2},
+		{OpGetLocal, []int{255}, 1},
 	}
 
 	for _, tC := range testCases {

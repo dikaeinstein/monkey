@@ -15,7 +15,7 @@ func Parse(input string) *ast.Program {
 	return p.ParseProgram()
 }
 
-func TestIntegerObject(expected int64, actual object.Object) error {
+func IntegerObject(expected int64, actual object.Object) error {
 	result, ok := actual.(object.Integer)
 	if !ok {
 		return fmt.Errorf("object is not Integer. got=%T (%+v)",

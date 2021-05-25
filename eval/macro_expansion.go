@@ -95,7 +95,7 @@ func quoteArgs(exp *ast.CallExpression) []*object.Quote {
 }
 
 func extendMacroEnv(macro *object.Macro, args []*object.Quote) *object.Environment {
-	extended := macro.Env.AddFrame()
+	extended := macro.Env
 
 	for paramIdx, param := range macro.Parameters {
 		extended.Set(param.Value, args[paramIdx])

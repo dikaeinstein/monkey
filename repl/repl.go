@@ -34,8 +34,15 @@ const MonkeyFace = `             __,__
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
-	// env := object.NewEnvironment()
 	macroEnv := object.NewEnvironment()
+
+	constants := []object.Object{}
+	globals := make([]object.Object, vm.GlobalsSize)
+
+	symbolTable := compile.NewSymbolTable()
+	for i, def := range object.Builtins() {
+		symbolTable.DefineBuiltin(i, def.Name)
+	}
 
 	for {
 		fmt.Print(prompt)
@@ -56,32 +63,25 @@ func Start(in io.Reader, out io.Writer) {
 		eval.DefineMacros(program, macroEnv)
 		expanded := eval.ExpandMacros(program, macroEnv)
 
-		// TODO
-		// evaluated := eval.Eval(expanded, env)
-		// if evaluated != nil {
-		// 	_, err := io.WriteString(out, evaluated.Inspect())
-		// 	must(err)
-		// 	_, err = io.WriteString(out, "\n")
-		// 	must(err)
-		// }
-
-		compiler := compile.New()
+		compiler := compile.New(symbolTable, constants)
 		err := compiler.Compile(expanded)
 		if err != nil {
 			fmt.Fprintf(out, "Woops! Compilation failed:\n %s\n", err)
 			continue
 		}
 
-		machine := vm.New(compiler.Bytecode())
+		code := compiler.Bytecode()
+		constants = code.Constants
+
+		machine := vm.NewWithGlobalsStore(code, globals)
 		err = machine.Run()
 		if err != nil {
 			fmt.Fprintf(out, "Woops! Executing bytecode failed:\n %s\n", err)
 			continue
 		}
 
-		machine.StackTop()
-		stackTop := machine.StackTop()
-		_, err = io.WriteString(out, stackTop.Inspect())
+		lastPopped := machine.LastPoppedStackElem()
+		_, err = io.WriteString(out, lastPopped.Inspect())
 		must(err)
 		_, err = io.WriteString(out, "\n")
 		must(err)

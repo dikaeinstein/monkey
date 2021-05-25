@@ -8,9 +8,6 @@ import (
 	"github.com/dikaeinstein/monkey/token"
 )
 
-// The one and only null value
-var defaultNull = &object.Null{}
-
 // Eval evaluates walks the code by walking the parsed AST
 //gocyclo:ignore
 func Eval(node ast.Node, env *object.Environment) object.Object {
@@ -24,7 +21,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalStatements(node.Statements, env)
 	case *ast.LetStatement:
 		val := Eval(node.Value, env)
-		if isError(val) {
+		if object.IsError(val) {
 			return val
 		}
 		env.Set(node.Name.Value, val)
@@ -56,11 +53,11 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalHashLiteral(node, env)
 	case *ast.IndexExpression:
 		left := Eval(node.Left, env)
-		if isError(left) {
+		if object.IsError(left) {
 			return left
 		}
 		index := Eval(node.Index, env)
-		if isError(index) {
+		if object.IsError(index) {
 			return index
 		}
 		return evalIndexExpression(left, index)
@@ -77,7 +74,7 @@ func evalStatements(statements []ast.Statement, env *object.Environment) object.
 			return Eval(stmt, env)
 		}
 		result = Eval(stmt, env)
-		if isError(result) {
+		if object.IsError(result) {
 			return result
 		}
 	}
@@ -87,7 +84,7 @@ func evalStatements(statements []ast.Statement, env *object.Environment) object.
 
 func evalPrefixExpression(node *ast.PrefixExpression, env *object.Environment) object.Object {
 	right := Eval(node.Right, env)
-	if isError(right) {
+	if object.IsError(right) {
 		return right
 	}
 
@@ -103,11 +100,11 @@ func evalPrefixExpression(node *ast.PrefixExpression, env *object.Environment) o
 
 func evalInfixExpression(node *ast.InfixExpression, env *object.Environment) object.Object {
 	left := Eval(node.Left, env)
-	if isError(left) {
+	if object.IsError(left) {
 		return left
 	}
 	right := Eval(node.Right, env)
-	if isError(right) {
+	if object.IsError(right) {
 		return right
 	}
 
@@ -202,7 +199,7 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 
 func evalIfExpression(node *ast.IfExpression, env *object.Environment) object.Object {
 	condition := Eval(node.Condition, env)
-	if isError(condition) {
+	if object.IsError(condition) {
 		return condition
 	}
 	if isTruthy(condition) {
@@ -210,7 +207,7 @@ func evalIfExpression(node *ast.IfExpression, env *object.Environment) object.Ob
 	} else if node.Alternative != nil {
 		return Eval(node.Alternative, env)
 	} else {
-		return null()
+		return object.NullValue()
 	}
 }
 
@@ -240,7 +237,7 @@ func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Ob
 
 	for _, e := range exps {
 		evaluated := Eval(e, env)
-		if isError(evaluated) {
+		if object.IsError(evaluated) {
 			return []object.Object{evaluated}
 		}
 		result = append(result, evaluated)
@@ -255,12 +252,12 @@ func evalCallExpression(node *ast.CallExpression, env *object.Environment) objec
 	}
 
 	fn := Eval(node.Function, env)
-	if isError(fn) {
+	if object.IsError(fn) {
 		return fn
 	}
 
 	args := evalExpressions(node.Arguments, env)
-	if len(args) == 1 && isError(args[0]) {
+	if len(args) == 1 && object.IsError(args[0]) {
 		return args[0]
 	}
 
@@ -288,7 +285,7 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 
 func evalArrayLiteral(node *ast.ArrayLiteral, env *object.Environment) object.Object {
 	elements := evalExpressions(node.Elements, env)
-	if len(elements) == 1 && isError(elements[0]) {
+	if len(elements) == 1 && object.IsError(elements[0]) {
 		return elements[0]
 	}
 	return &object.Array{Elements: elements}
@@ -311,7 +308,7 @@ func evalArrayIndexExpression(left, index object.Object) object.Object {
 	max := int64(len(array.Elements) - 1)
 
 	if idx < 0 || int64(idx) > max {
-		return null()
+		return object.NullValue()
 	}
 
 	return array.Elements[idx]
@@ -322,13 +319,13 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 
 	for k, v := range node.Pairs {
 		kk := evalHashKey(Eval(k, env))
-		if isError(kk) {
+		if object.IsError(kk) {
 			return kk
 		}
 
 		key := kk.(object.String)
 		value := Eval(v, env)
-		if isError(value) {
+		if object.IsError(value) {
 			return value
 		}
 
@@ -354,14 +351,14 @@ func evalHashKey(key object.Object) object.Object {
 func evalHashIndexExpression(left, index object.Object) object.Object {
 	hash := left.(*object.Hash)
 	kk := evalHashKey(index)
-	if isError(kk) {
+	if object.IsError(kk) {
 		return kk
 	}
 
 	key := kk.(object.String)
 	val, ok := hash.Pairs[key]
 	if !ok {
-		return null()
+		return object.NullValue()
 	}
 
 	return val
@@ -438,15 +435,4 @@ func isTruthy(obj object.Object) bool {
 
 func newError(format string, a ...interface{}) object.Error {
 	return object.Error(fmt.Sprintf(format, a...))
-}
-
-func null() *object.Null {
-	return defaultNull
-}
-
-func isError(obj object.Object) bool {
-	if obj != nil {
-		return obj.Type() == object.ERROR
-	}
-	return false
 }

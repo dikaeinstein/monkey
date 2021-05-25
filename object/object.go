@@ -6,7 +6,17 @@ import (
 	"strings"
 
 	"github.com/dikaeinstein/monkey/ast"
+	"github.com/dikaeinstein/monkey/code"
 )
+
+// defaultNull is the one and only null value
+var defaultNull = &Null{}
+
+// NullValue returns the &Null{} value.
+// It should be used where a null value is needed.
+func NullValue() *Null {
+	return defaultNull
+}
 
 type Type string
 
@@ -18,17 +28,19 @@ type Object interface {
 }
 
 const (
-	ARRAY    Type = "ARRAY"
-	BOOLEAN  Type = "BOOLEAN"
-	BUILTIN  Type = "BUILTIN"
-	ERROR    Type = "ERROR"
-	FUNCTION Type = "FUNCTION"
-	HASH     Type = "HASH"
-	INTEGER  Type = "INTEGER"
-	NULL     Type = "NULL"
-	STRING   Type = "STRING"
-	QUOTE    Type = "QUOTE"
-	MACRO    Type = "MACRO"
+	ARRAY            Type = "ARRAY"
+	BOOLEAN          Type = "BOOLEAN"
+	BUILTIN          Type = "BUILTIN"
+	COMPILEDFUNCTION Type = "COMPILEDFUNCTION"
+	CLOSURE          Type = "CLOSURE"
+	ERROR            Type = "ERROR"
+	FUNCTION         Type = "FUNCTION"
+	HASH             Type = "HASH"
+	INTEGER          Type = "INTEGER"
+	MACRO            Type = "MACRO"
+	NULL             Type = "NULL"
+	QUOTE            Type = "QUOTE"
+	STRING           Type = "STRING"
 )
 
 type Integer int64
@@ -158,4 +170,42 @@ func (m *Macro) Inspect() string {
 	out.WriteString("\n}")
 
 	return out.String()
+}
+
+type CompiledFunction struct {
+	Instructions  code.Instructions
+	NumLocals     int
+	NumParameters int
+}
+
+func (cf *CompiledFunction) Type() Type { return COMPILEDFUNCTION }
+func (cf *CompiledFunction) Inspect() string {
+	return fmt.Sprintf("CompiledFunction[%p]", cf)
+}
+
+type Closure struct {
+	Fn   *CompiledFunction
+	Free []Object
+}
+
+func (c *Closure) Type() Type { return CLOSURE }
+func (c *Closure) Inspect() string {
+	return fmt.Sprintf("Closure[%p]", c)
+}
+
+func IsHashable(key Object) (String, bool) {
+	var k String
+
+	switch key := key.(type) {
+	case String:
+		k = key
+	case Integer:
+		k = String(key.Inspect())
+	case Boolean:
+		k = String(key.Inspect())
+	default:
+		return "", false
+	}
+
+	return k, true
 }

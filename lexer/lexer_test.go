@@ -9,7 +9,7 @@ import (
 func TestNextToken(t *testing.T) {
 	input := buildInput(t)
 
-	tests := []struct {
+	testCases := []struct {
 		expectedType    token.Type
 		expectedLiteral string
 	}{
@@ -126,16 +126,16 @@ func TestNextToken(t *testing.T) {
 
 	l := New(input)
 
-	for i, tt := range tests {
+	for i, tt := range testCases {
 		tok := l.NextToken()
 
 		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - token type wrong. Expected=%q, got=%q",
+			t.Fatalf("testCases[%d] - token type wrong. Expected=%q, got=%q",
 				i, tt.expectedType, tok.Type)
 		}
 
 		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - literal wrong. Expected=%q, got=%q",
+			t.Fatalf("testCases[%d] - literal wrong. Expected=%q, got=%q",
 				i, tt.expectedLiteral, tok.Literal)
 		}
 	}

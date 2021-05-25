@@ -4,8 +4,8 @@ linters-settings:
   exhaustive:
     default-signifies-exhaustive: true
   funlen:
-    lines: 150
-    statements: 75
+    lines: 200
+    statements: 150
   gci:
     local-prefixes: github.com/golangci/golangci-lint
   goconst:
@@ -73,6 +73,7 @@ linters:
     - dupl
     - errcheck
     - exhaustive
+    - exportloopref
     - funlen
     - gochecknoinits
     - goconst
@@ -93,7 +94,6 @@ linters:
     - noctx
     - nolintlint
     - rowserrcheck
-    - scopelint
     - staticcheck
     - structcheck
     - stylecheck
@@ -113,6 +113,7 @@ issues:
     - path: _test\.go
       linters:
         - gomnd
+        - dupl
     - path: eval_test\.go
       linters:
         - goconst
