@@ -13,8 +13,10 @@ import (
 	"github.com/dikaeinstein/monkey/vm"
 )
 
-const prompt = ">> "
-const allowedNumOfErrors = 0
+const (
+	prompt             = ">> "
+	allowedNumOfErrors = 0
+)
 
 // MonkeyFace is the face of our lovely mascot
 const MonkeyFace = `             __,__
@@ -27,8 +29,7 @@ const MonkeyFace = `             __,__
         |  \._   _./  |
         \   \ '~' /   /
          '._ '-=-' _.'
-            '-----'
-`
+            '-----'`
 
 // Start starts the REPL with the given io.Reader and io.Writer
 func Start(in io.Reader, out io.Writer) {

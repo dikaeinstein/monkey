@@ -13,18 +13,18 @@ blocks:
         - name: Lint
           commands:
             - checkout
-            - sem-version go 1.15
+            - sem-version go 1.17
             - export PATH=$PATH:$(go env GOPATH)/bin
-            - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.38.0
+            - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.46.2
             - golangci-lint --version
-            - make lint
+            - golangci-lint run
   - name: Test
     task:
       jobs:
         - name: Go test
           commands:
             - checkout
-            - sem-version go 1.15
+            - sem-version go 1.17
             - make test
   - name: Build project
     task:
@@ -32,7 +32,7 @@ blocks:
       - name: Build Binary
         commands:
           - checkout
-          - sem-version go 1.16
+          - sem-version go 1.17
           - make build
           - mkdir bin
           - mv monkey bin

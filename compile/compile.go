@@ -247,8 +247,10 @@ func (c *Compiler) compileIfExpression(node *ast.IfExpression) error {
 	if err != nil {
 		return err
 	}
+
+	const bogus = 9999
 	// Emit an `OpJumpNotTruthy` with a bogus value
-	jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, 9999)
+	jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, bogus)
 	err = c.Compile(node.Consequence)
 	if err != nil {
 		return err
@@ -259,7 +261,7 @@ func (c *Compiler) compileIfExpression(node *ast.IfExpression) error {
 	}
 
 	// Emit an `OpJump` with a bogus value
-	jumpPos := c.emit(code.OpJump, 9999)
+	jumpPos := c.emit(code.OpJump, bogus)
 
 	afterConsequencePos := len(c.currentInstructions())
 	c.changeOperands(jumpNotTruthyPos, afterConsequencePos)
