@@ -10,22 +10,22 @@ blocks:
   - name: Check code style
     task:
       jobs:
-        - name: Lint
-          commands:
-            - checkout
-            - sem-version go 1.17
-            - export PATH=$PATH:$(go env GOPATH)/bin
-            - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.46.2
-            - golangci-lint --version
-            - golangci-lint run
+      - name: Lint
+        commands:
+          - checkout
+          - sem-version go 1.17
+          - export PATH=$PATH:$(go env GOPATH)/bin
+          - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.46.2
+          - golangci-lint --version
+          - golangci-lint run
   - name: Test
     task:
       jobs:
-        - name: Go test
-          commands:
-            - checkout
-            - sem-version go 1.17
-            - make test
+      - name: Go test
+        commands:
+          - checkout
+          - sem-version go 1.17
+          - make test
   - name: Build project
     task:
       jobs:
